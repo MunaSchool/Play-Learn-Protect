@@ -19,6 +19,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import EditLearningModulePage from './pages/EditLearningModulePage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -146,7 +147,14 @@ function App() {
             </ProtectedRoute>
           } 
         />
-
+        <Route 
+          path="/learning/:moduleId/edit" 
+          element={
+           <ProtectedRoute>
+      <EditLearningModulePage />
+    </ProtectedRoute>
+  } 
+/>
         {/* Monitoring Routes */}
         <Route 
           path="/monitoring" 

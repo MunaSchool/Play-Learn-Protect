@@ -229,7 +229,7 @@ const GameDetailPage = () => {
                 onClick={handleStartGame}
                 disabled={!selectedChild}
               >
-                <span className="text-2xl">🎮</span>
+                <span className="text-2xl"></span>
                 <span>Play Now</span>
               </Button>
 

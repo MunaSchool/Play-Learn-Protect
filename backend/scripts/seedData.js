@@ -345,7 +345,7 @@ const sampleModules = [
         titleArabic: 'ما هي الحياة؟',
         contentType: 'video',
         content: 'https://www.youtube.com/watch?v=QImCld9YubE',
-        duration: 15,
+        duration: 10,
         order: 1
       },
       {
@@ -353,7 +353,7 @@ const sampleModules = [
         title: 'Plant Life Cycle Stages From Seed To Fruit ',
         titleArabic: 'مراحل دورة حياة النبات من البذرة إلى الثمرة',
         contentType: 'video',
-        content: 'https://youtu.be/QImCld9YubE?si=5PeKraUQVVaJ6vli',
+        content: 'https://youtu.be/2SBVz4MgeIE?si=m2K20j1JuwW6QTPl',
         duration: 5,
         order: 2
       },

@@ -39,17 +39,6 @@ const childSchema = new mongoose.Schema({
     default: 'other'
   },
   
-  // Avatar/Profile
-  avatar: {
-    type: String,
-    default: 'default-avatar.png'
-  },
-  
-  avatarColor: {
-    type: String,
-    default: '#4A90E2'
-  },
-  
   // Connected Adults
   parents: [{
     type: mongoose.Schema.Types.ObjectId,

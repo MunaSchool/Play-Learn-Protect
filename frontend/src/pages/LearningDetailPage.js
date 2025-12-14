@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
@@ -12,6 +13,7 @@ import { getCategoryColor } from '../utils/helpers';
 const LearningDetailPage = () => {
   const { moduleId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [module, setModule] = useState(null);
   const [children, setChildren] = useState([]);
@@ -35,16 +37,17 @@ const LearningDetailPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [moduleRes, childrenRes] = await Promise.all([
-        learningAPI.getOne(moduleId),
-        childrenAPI.getAll()
-      ]);
-      
+      const moduleRes = await learningAPI.getOne(moduleId);
       setModule(moduleRes.data.data);
-      setChildren(childrenRes.data.data);
       
-      if (childrenRes.data.data.length > 0) {
-        setSelectedChild(childrenRes.data.data[0]._id);
+      // Only fetch children if user is parent (not teacher)
+      if (user?.role === 'parent') {
+        const childrenRes = await childrenAPI.getAll();
+        setChildren(childrenRes.data.data);
+        
+        if (childrenRes.data.data.length > 0) {
+          setSelectedChild(childrenRes.data.data[0]._id);
+        }
       }
     } catch (error) {
       console.error('Error fetching module:', error);
@@ -74,37 +77,31 @@ const LearningDetailPage = () => {
       return;
     }
 
-    try {
-      await learningAPI.enroll(moduleId, selectedChild);
-      
-      // Open the first lesson directly
-      if (module.lessons && module.lessons.length > 0) {
-        const firstLesson = module.lessons[0];
-        window.open(firstLesson.content, '_blank', 'noopener,noreferrer');
-      } else {
-        alert('Successfully enrolled! Lessons coming soon.');
-      }
-      
-      // Refresh progress after enrollment
-      await fetchProgress();
-    } catch (error) {
-      console.error('Error enrolling:', error);
-      
-      // If already enrolled or error, just open first lesson anyway
-      if (module.lessons && module.lessons.length > 0) {
-        const firstLesson = module.lessons[0];
-        window.open(firstLesson.content, '_blank', 'noopener,noreferrer');
-      }
-    }
+   try {
+  await learningAPI.enroll(moduleId, selectedChild);
+
+  const updatedModule = await learningAPI.getOne(moduleId);
+  setModule(updatedModule.data.data);
+
+  await fetchProgress();
+} catch (error) {
+  console.error('Error enrolling:', error);
+}
+
   };
 
   const handleLessonClick = (lesson) => {
+    if (user?.role === 'teacher') {
+      // Teachers can view lessons without selecting a child
+      window.open(lesson.content, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
     if (!selectedChild) {
       alert('Please select a child first');
       return;
     }
     
-    // Open the lesson content
     window.open(lesson.content, '_blank', 'noopener,noreferrer');
   };
 
@@ -116,14 +113,8 @@ const LearningDetailPage = () => {
 
     try {
       setCompletingLesson(lessonNumber);
-      
-      // Call API to mark lesson as complete
       await progressAPI.completeLesson(moduleId, selectedChild, lessonNumber);
-      
-      // Refresh progress
       await fetchProgress();
-      
-      // Show success message
       alert(`✅ Lesson ${lessonNumber} marked as complete!`);
     } catch (error) {
       console.error('Error marking lesson complete:', error);
@@ -210,8 +201,8 @@ const LearningDetailPage = () => {
 
               <h1 className="text-3xl font-bold text-gray-800 mb-4">{module.title}</h1>
               
-              {/* Progress Bar */}
-              {progress && (
+              {/* Progress Bar - Only for parents */}
+              {user?.role === 'parent' && progress && (
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-gray-700">
@@ -318,7 +309,7 @@ const LearningDetailPage = () => {
                               {lesson.contentType === 'video' ? 'Watch' : 'Start'}
                             </Button>
                             
-                            {!isCompleted && (
+                            {user?.role === 'parent' && !isCompleted && (
                               <Button
                                 size="sm"
                                 onClick={() => handleMarkComplete(lesson.lessonNumber)}
@@ -328,7 +319,7 @@ const LearningDetailPage = () => {
                               </Button>
                             )}
                             
-                            {isCompleted && (
+                            {user?.role === 'parent' && isCompleted && (
                               <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                                 Completed ✓
                               </span>
@@ -360,7 +351,9 @@ const LearningDetailPage = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <Card>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Enroll Now</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">
+                {user?.role === 'teacher' ? 'Module Info' : 'Enroll Now'}
+              </h3>
 
               {/* Age Groups */}
               <div className="mb-4">
@@ -382,8 +375,8 @@ const LearningDetailPage = () => {
                 </span>
               </div>
 
-              {/* Select Child */}
-              {children.length > 0 && (
+              {/* Select Child - Only for parents */}
+              {user?.role === 'parent' && children.length > 0 && (
                 <div className="mb-4">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Select Child
@@ -402,16 +395,29 @@ const LearningDetailPage = () => {
                 </div>
               )}
 
-              {/* Enroll Button */}
-              <Button 
-                fullWidth 
-                size="lg"
-                onClick={handleEnroll}
-                disabled={!selectedChild}
-              >
-                <span className="text-2xl">🎓</span>
-                <span>Start Learning</span>
-              </Button>
+              {/* Action Button */}
+              {user?.role === 'parent' && (
+                <Button 
+                  fullWidth 
+                  size="lg"
+                  onClick={handleEnroll}
+                  disabled={!selectedChild}
+                >
+                  <span className="text-2xl"></span>
+                  <span>Enroll</span>
+                </Button>
+              )}
+
+              {user?.role === 'teacher' && (
+                <Button 
+                  fullWidth 
+                  size="lg"
+                  onClick={() => navigate(`/learning/${moduleId}/edit`)}
+                >
+                  <span className="text-2xl">✏️</span>
+                  <span>Edit Module</span>
+                </Button>
+              )}
 
               {/* Certificate Info */}
               {module.certificate?.available && (

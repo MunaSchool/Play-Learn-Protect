@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
@@ -11,6 +12,7 @@ import { getCategoryColor, truncate } from '../utils/helpers';
 
 const LearningPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,16 @@ const LearningPage = () => {
     });
   };
 
+  const handleModuleAction = (moduleId) => {
+    if (user?.role === 'teacher') {
+      // Teachers go to edit page
+      navigate(`/learning/${moduleId}/edit`);
+    } else {
+      // Parents go to learning detail page
+      navigate(`/learning/${moduleId}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 via-blue-100 to-purple-100">
       <Navbar />
@@ -53,7 +65,12 @@ const LearningPage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">📚 Learning Modules</h1>
-          <p className="text-gray-600 text-lg">Structured courses to master new skills</p>
+          <p className="text-gray-600 text-lg">
+            {user?.role === 'teacher' 
+              ? 'Manage and edit learning modules for your students'
+              : 'Structured courses to master new skills'
+            }
+          </p>
         </div>
 
         {/* Filters */}
@@ -148,7 +165,7 @@ const LearningPage = () => {
               <Card 
                 key={module._id} 
                 className="cursor-pointer hover:shadow-2xl transition-all"
-                onClick={() => navigate(`/learning/${module._id}`)}
+                onClick={() => handleModuleAction(module._id)}
               >
                 {/* Module Thumbnail */}
                 <div
@@ -209,10 +226,20 @@ const LearningPage = () => {
                   fullWidth
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/learning/${module._id}`);
+                    handleModuleAction(module._id);
                   }}
                 >
-                  Start Learning →
+                  {user?.role === 'teacher' ? (
+                    <>
+                      <span>✏️</span>
+                      <span>Edit Module</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Start Learning</span>
+                      <span>→</span>
+                    </>
+                  )}
                 </Button>
               </Card>
             ))}
