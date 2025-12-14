@@ -21,7 +21,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center space-x-2">
-            <span className="text-3xl">🎮</span>
+            <span className="text-3xl"></span>
             <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Play, Learn & Protect
             </span>
