@@ -232,12 +232,12 @@ const CreateLearningModulePage = () => {
 
             if (moduleId) {
                 await learningAPI.update(moduleId, payload);
-                setSuccess('✅ Module updated successfully! You can continue editing.');
+                setSuccess(' Module updated successfully! You can continue editing.');
                 // Don't redirect after update
                 setTimeout(() => setSuccess(''), 3000); // Clear success message after 3s
             } else {
                 await learningAPI.create(payload);
-                setSuccess('✅ Module created successfully!');
+                setSuccess(' Module created successfully!');
                 setTimeout(() => navigate('/learning'), 1500);
             }
         } catch (error) {
@@ -261,7 +261,7 @@ const CreateLearningModulePage = () => {
                         <p className="text-gray-600">{moduleId ? 'Update existing course details' : 'Design a new course for your students'}</p>
                     </div>
                     <Button size="lg" onClick={handleCreate} disabled={saving}>
-                        {saving ? (moduleId ? 'Updating...' : 'Creating...') : (moduleId ? '💾 Save Changes' : '🚀 Publish Module')}
+                        {saving ? (moduleId ? 'Updating...' : 'Creating...') : (moduleId ? 'Save Changes' : ' Publish Module')}
                     </Button>
                 </div>
 
@@ -353,7 +353,7 @@ const CreateLearningModulePage = () => {
                                                 onChange={(e) => handleModuleChange('subject', e.target.value)}
                                             >
                                                 <option value="Maths">Maths</option>
-                                                <option value="Science">Science</option>
+                                                <option value="Biology">Biology</option>
                                                 <option value="English">English</option>
                                                 <option value="Arabic">Arabic</option>
                                                 <option value="Coding">Coding</option>
