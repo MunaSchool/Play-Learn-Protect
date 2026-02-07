@@ -20,11 +20,6 @@ A web-based platform for children, parents, and educators in Egypt, supporting E
 
 Switch between English and Arabic using the language toggle in the Navbar.
 
-## SRS Document
-
-To include your SRS Word document:
-- Place your SRS .docx file in the root directory.
-- Add a note in this README (see below).
 
 ## Including SRS Document
 
